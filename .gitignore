@@ -1,0 +1,23 @@
+# Snakemake runtime
+.snakemake/
+
+# Generated results
+results/
+
+# Local runtime configs
+config/config.run.yaml
+config/config.resolved.yaml
+
+# Downloaded data payloads (keep template docs only)
+data/raw/
+data/models/
+data/reference/
+data/exports/
+!data/README.md
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS/editor
+.DS_Store

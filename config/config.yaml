@@ -1,0 +1,156 @@
+source:
+  assignment1_notebook: data/notebooks/Assignment_1.ipynb
+  assignment2_notebook: data/notebooks/Assignment_2.ipynb
+  deseq2_script: data/scripts/Asisignment_2-DESeq2_brain.R
+  fgsea_script: data/scripts/Asisignment_2-fGSEA_AD.R
+  nichenet_script_1: data/scripts/Asisignment_2-nichenet_brain_1.R
+  nichenet_script_2: data/scripts/Asisignment_2-nichenet_brain-2.R
+  nichenet_script_3: data/scripts/Asisignment_2-nichenet-3_LRnetwork.R
+  # Raw query data for scVI/SCANVI inference target
+  raw_merscope_h5ad: data/raw/merscope_raw.h5ad
+  # Labeled reference data used to train SCANVI label transfer
+  scvi_reference_h5ad: data/raw/scrna_reference_raw.h5ad
+  # Backward-compatible field (not used by current workflow)
+  merscope_h5ad: data/raw/merscope_raw.h5ad
+  atlas_data_dir: data/reference/DAPI_downsampling
+  latent_top100: data/models/VAE_model/latent_top100_df.csv
+  deseq2_dir: data/exports/DESeq2
+  nichenet_dir: data/exports/Nichnet
+  fgsea_dir: data/exports/fGSEA
+  vae_model_dir: data/models/VAE_model
+  plaques_h5ad: data/raw/Plaques_Object.h5ad
+
+assignment1:
+  output_dir: results/assignment
+  input_mode: existing_h5ad
+  existing_h5ad_path: data/raw/merscope_raw.h5ad
+  atlas_annot_path: data/reference/DAPI_downsampling/annotation_25.nrrd
+  atlas_template_path: data/reference/DAPI_downsampling/average_template_25.nrrd
+  structure_tree_path: data/reference/DAPI_downsampling/structure_tree_safe_2017.csv
+  allow_provisional_auto_ccf: false
+  provisional_z_search_step: 5
+  sample_to_micron2px_csv:
+    WT1: WT-5xFAD10518pHip300GP_region_0_micron_to_mosaic_pixel_transform.csv
+    5xFAD1: WT-5xFAD10518pHip300GP_region_1_micron_to_mosaic_pixel_transform.csv
+    WT3: 202209041036_5xFAD-TREM2-AnteHip-Region_1_micron_to_mosaic_pixel_transform.csv
+    5xFAD3: 202209041036_5xFAD-TREM2-AnteHip-Region_3_micron_to_mosaic_pixel_transform.csv
+  sample_registration:
+    WT1:
+      matrix_2x3:
+        - [0.00259381898, 0.0, 147.293598]
+        - [0.0, 0.00245092025, 109.831902]
+      z_voxel: 30.0
+    5xFAD1:
+      matrix_2x3:
+        - [-0.0068601372, 0.0, 419.0]
+        - [0.0, 0.00502025095, 45.0]
+      z_voxel: 222.0
+    WT3:
+      matrix_2x3:
+        - [-0.00296753698, 0.0, 318.705986]
+        - [0.0, 0.00269763601, 104.583338]
+      z_voxel: 32.0
+    5xFAD3:
+      matrix_2x3:
+        - [-0.00616808019, 0.0, 435.041126]
+        - [0.0, 0.00607960199, -5.16616915]
+      z_voxel: 258.0
+
+scrna_preprocess:
+  # Cell-level QC filters (set to null to disable each filter)
+  min_genes_per_cell: null
+  max_genes_per_cell: null
+  max_pct_counts_mt: null
+  min_counts_per_cell: null
+
+  # Feature-level filter
+  min_cells_per_gene: 1
+
+  # Normalization and feature selection
+  target_sum: 10000
+  n_top_genes: 2000
+  hvg_flavor: seurat
+
+  # Dimensionality reduction / graph / clustering
+  n_pcs: 30
+  n_neighbors: 15
+  leiden_resolution: 0.5
+  leiden_key: leiden_res_0.50
+
+assignment2_notebook_figures:
+  microglia_label: Microglia
+  oligodendrocyte_label: Oligodendrocyte
+  target_genes:
+    - Trem2
+    - Apoe
+  n_neighbors: 12
+  min_cells_per_sample: 5
+  posterior_label: Posterior Hippocampus
+  anterior_label: Anterior Hippocampus
+  region_major_label: Hippocampus
+  vae_focus_latent: z15
+  vae_top_n_genes: 10
+  plaque_sample_map:
+    - sample_path: data/raw/merscope_regions/WT-5xFAD10518pHip300GP/region_0.h5ad
+      sample_id: WT1
+      genotype: WT
+      region_location: Posterior Hippocampus
+    - sample_path: data/raw/merscope_regions/WT-5xFAD10518pHip300GP/region_1.h5ad
+      sample_id: 5xFAD1
+      genotype: 5xFAD
+      region_location: Posterior Hippocampus
+    - sample_path: data/raw/merscope_regions/5xFAD-TREM2-AnteHip-300x05/region_1.h5ad
+      sample_id: WT3
+      genotype: WT
+      region_location: Anterior Hippocampus
+    - sample_path: data/raw/merscope_regions/5xFAD-TREM2-AnteHip-300x05/region_3.h5ad
+      sample_id: 5xFAD3
+      genotype: 5xFAD
+      region_location: Anterior Hippocampus
+
+assignment1_notebook_figures:
+  n_pcs_elbow: 50
+  ccf_top_n: 20
+
+external_sync:
+  copy_entire_dirs: true
+
+copy_targets:
+  latent_top100_csv: results/vae/latent_top100_df.csv
+  deseq2_outputs:
+    - results/deseq2/pseudobulk_Oligodendrocyte.csv
+    - results/deseq2/pseudobulk_Microglia.csv
+    - results/deseq2/sample_id_age_group.csv
+    - results/deseq2/Oligodendrocyte_bulk_rna_vsd_preprocess.csv
+    - results/deseq2/Microglia_bulk_rna_vsd_preprocess.csv
+  nichenet_outputs:
+    - results/nichenet/CCI_adata.h5ad
+    - results/nichenet/all_CCI_adata.h5ad
+    - results/nichenet/active_signaling_network_together.csv
+    - results/nichenet/network_LR(Apoe).png
+    - results/nichenet/circos_plot.pdf
+    - results/nichenet/Prioritized_ligands.png
+    - results/nichenet/Ligand_Receptor.png
+    - results/nichenet/Ligand_expression.png
+    - results/nichenet/AUPR.png
+    - results/nichenet/histo_lig_acticity.png
+    - results/nichenet/Pathway_heatmap.png
+    - results/nichenet/Interaction_weights.png
+    - results/nichenet/Number_of_interactions.png
+    - results/nichenet/Mush_plot.pdf
+  fgsea_outputs:
+    results_csv: results/fgsea/fgsea_results.csv
+    plot_png: results/fgsea/z15_DAM_pathway_bubbleplot.png
+
+runtime:
+  # Python executable that has scvi-tools installed.
+  scvi_python: python
+
+scvi:
+  label_key: final_label_transfer
+  batch_key: sample_id
+  unlabeled_category: Unknown
+  n_latent: 30
+  max_epochs_scvi: 200
+  max_epochs_scanvi: 40
+  seed: 0
